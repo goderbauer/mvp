@@ -17,3 +17,8 @@ $ flutter run -d <windows|linux|macos> -t lib/<sample_file_name>.dart
 Renders some view-specific information into each `FlutterView` available in `PlatformDispatcher.views` using only APIs
 exposed by `dart:ui`. A new frame is only scheduled if the metrics of a `FlutterView` change or if a view is
 added/removed.
+
+### raw_dynamic.dart
+
+Renders a spinning rectangular into each `FlutterView` available in `PlatformDispatcher.views` using only APIs exposed
+by `dart:ui`. Frames are continuously scheduled to keep the animation running.
