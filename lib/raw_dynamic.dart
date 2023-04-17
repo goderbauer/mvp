@@ -27,7 +27,6 @@ void _handleOnMetricsChanged() {
 
 void _handleOnBeginFrame(Duration timeStamp) {
   for (final FlutterView view in PlatformDispatcher.instance.views) {
-    print('## Rendering to ${view.viewId} ${view.physicalSize}');
     final Size logicalSize = view.physicalSize / view.devicePixelRatio;
     final Color color = _colors[(view.viewId as int) % _colors.length];
 
