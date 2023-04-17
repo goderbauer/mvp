@@ -37,7 +37,6 @@ class SideFlutterWindow: NSWindow {
     self.flutterViewController = FlutterViewController(engine: engine, nibName: nil, bundle: nil)
     print("SideFlutterWindow.init 3")
     fflush(stdout)
-    self.setFrame(rect, display: true)
     print("SideFlutterWindow.init 4")
     fflush(stdout)
   }
@@ -45,6 +44,8 @@ class SideFlutterWindow: NSWindow {
   var flutterViewController: FlutterViewController?
 
   func activate() {
+    let frame = self.frame
     self.contentViewController = self.flutterViewController
+    self.setFrame(frame, display: true)
   }
 }
