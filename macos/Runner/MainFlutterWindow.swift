@@ -22,10 +22,9 @@ class MainFlutterWindow: NSWindow {
 
 class SideFlutterWindow: NSWindow {
   init(engine: FlutterEngine) {
-    let rect = NSRect.init(origin: .zero,
+    super.init(contentRect: .init(origin: .zero,
                                   size: .init(width: 400,
-                                              height: 400))
-    super.init(contentRect: rect,
+                                              height: 400)),
                styleMask: [.titled, .closable, .miniaturizable, .resizable],
                backing: .buffered,
                defer: false)
@@ -35,8 +34,8 @@ class SideFlutterWindow: NSWindow {
   var flutterViewController: FlutterViewController?
 
   func activate() {
-    let frame = self.frame
+    let windowFrame = self.frame
     self.contentViewController = self.flutterViewController
-    self.setFrame(frame, display: true)
+    self.setFrame(windowFrame, display: true)
   }
 }
