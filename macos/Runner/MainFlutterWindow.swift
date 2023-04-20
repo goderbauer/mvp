@@ -28,14 +28,8 @@ class SideFlutterWindow: NSWindow {
                styleMask: [.titled, .closable, .miniaturizable, .resizable],
                backing: .buffered,
                defer: false)
-    self.flutterViewController = FlutterViewController(engine: engine, nibName: nil, bundle: nil)
-  }
-
-  var flutterViewController: FlutterViewController?
-
-  func activate() {
     let windowFrame = self.frame
-    self.contentViewController = self.flutterViewController
+    self.contentViewController  = FlutterViewController(engine: engine, nibName: nil, bundle: nil)
     self.setFrame(windowFrame, display: true)
   }
 }
