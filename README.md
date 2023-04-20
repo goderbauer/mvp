@@ -30,13 +30,17 @@ git fetch loic-sharma
 git checkout 087d63a3d1f01da5646e4e76b8d81766fbaa79c6
 ```
 2. Build the custom engine: See [the wiki page](https://github.com/flutter/flutter/wiki/Compiling-the-engine#compiling-for-macos-or-linux).
-3. In **this repo**, run the sample file with the custom engine. For example,
+3. In **this repo**, update packages.
 ```
-$ flutter run --local-engine=host_debug_unopt -d macos -t lib/raw_dynamic.dart
+flutter pub get
+```
+4. Run the sample file with the custom engine. For example,
+```
+flutter run --local-engine=host_debug_unopt -d macos -t lib/raw_dynamic.dart
 ```
 See below for the list of sample apps.
 
-4. If everything goes well, the app should start up with a window, then another window after 1 second.
+5. If everything goes well, the app should start up with a window, then another window after 1 second.
 
 ## Samples
 
