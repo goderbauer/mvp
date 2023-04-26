@@ -9,7 +9,8 @@ outdated and/or have other issues. DO NOT DEPEND ON ANYTHING IN THIS REPOSITORY.
 This sample must be used with the correct revision of a custom engine.
 Currently, it only supports macOS.
 
-## Setup
+### Setup
+
 1. Set up the Engine development environment: See [the wiki page](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment).
 2. In **the engine repo**, add the prototype remote:
 ```
@@ -23,7 +24,8 @@ dependency_overrides:
 ```
 This allows the sample to use the custom `dart:ui` library.
 
-## Build
+### Build
+
 1. In **the engine repo**, checkout the prototype branch
 ```
 git fetch loic-sharma
