@@ -6,7 +6,7 @@ outdated and/or have other issues. DO NOT DEPEND ON ANYTHING IN THIS REPOSITORY.
 
 ## How to use?
 
-This sample must be used with the correct revision of a custom engine and framework.
+This sample is meant to be used with a custom (prototype) engine and framework.
 Currently, it only supports macOS.
 
 0. Set up the Framework development environment: See [the wiki page](https://github.com/flutter/flutter/wiki/Setting-up-the-Framework-development-environment).

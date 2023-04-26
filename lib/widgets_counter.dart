@@ -2,21 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'src/widgets.dart';
 
 void main() {
   runAppWithoutImplicitView(MultiViewApp(
-    viewBuilder: (BuildContext context, FlutterView view) => Counter(view: view),
+    viewBuilder: (BuildContext context) => const Counter(),
   ));
 }
 
 class Counter extends StatelessWidget {
-  const Counter({super.key, required this.view});
-
-  final FlutterView view;
+  const Counter({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +22,7 @@ class Counter extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: MyHomePage(title: 'Counter View ${view.viewId}'),
+      home: MyHomePage(title: 'Counter View ${View.of(context).viewId}'),
     );
   }
 }

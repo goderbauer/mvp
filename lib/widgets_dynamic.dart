@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/widgets.dart';
 import 'src/widgets.dart';
 
 void main() {
   runAppWithoutImplicitView(MultiViewApp(
-    viewBuilder: (BuildContext context, FlutterView view) => const SpinningSquare(),
+    viewBuilder: (BuildContext context) => const SpinningSquare(),
   ));
 }
 

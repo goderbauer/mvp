@@ -6,14 +6,12 @@ import 'dart:ui' show FlutterView;
 
 import 'package:flutter/widgets.dart';
 
-typedef ViewBuilder = Widget Function(BuildContext context, FlutterView view);
-
 /// Calls [viewBuilder] for every view added to the app to obtain the widget to
-/// render into that view.
+/// render into that view. The current view can be looked up with [View.of].
 class MultiViewApp extends StatefulWidget {
   const MultiViewApp({super.key, required this.viewBuilder});
 
-  final ViewBuilder viewBuilder;
+  final WidgetBuilder viewBuilder;
 
   @override
   State<MultiViewApp> createState() => _MultiViewAppState();
@@ -30,10 +28,9 @@ class _MultiViewAppState extends State<MultiViewApp> with WidgetsBindingObserver
   @override
   void didUpdateWidget(MultiViewApp oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // TODO(goderbauer): Think about whether this is necessary.
-    if (oldWidget.viewBuilder != widget.viewBuilder) {
-      _updateViews(forceRebuild: true);
-    }
+    // Need to re-evaluate the viewBuilder callback for all views.
+    _views.clear();
+    _updateViews();
   }
 
   @override
@@ -43,10 +40,10 @@ class _MultiViewAppState extends State<MultiViewApp> with WidgetsBindingObserver
 
   Map<Object, Widget> _views = <Object, Widget>{};
 
-  void _updateViews({bool forceRebuild = false}) {
+  void _updateViews() {
     final Map<Object, Widget> newViews = <Object, Widget>{};
     for (final FlutterView view in WidgetsBinding.instance.platformDispatcher.views) {
-      final Widget viewWidget = (forceRebuild ? null : _views[view.viewId]) ?? _createViewWidget(view);
+      final Widget viewWidget = _views[view.viewId] ?? _createViewWidget(view);
       newViews[view.viewId] = viewWidget;
     }
     setState(() {
@@ -58,7 +55,7 @@ class _MultiViewAppState extends State<MultiViewApp> with WidgetsBindingObserver
     return View(
       view: view,
       child: Builder(
-        builder: (BuildContext context) => widget.viewBuilder(context, view),
+        builder: widget.viewBuilder,
       ),
     );
   }
@@ -76,7 +73,9 @@ class _MultiViewAppState extends State<MultiViewApp> with WidgetsBindingObserver
 }
 
 // TODO(goderbauer): Add this to the framework.
-// This is like runApp but without a call to WidgetsBinding.wrapWithDefaultView.
+/// This is like [runApp] but without a call to
+/// [WidgetsBinding.wrapWithDefaultView]. The provided `app` must instantiate
+/// [View] widgets where necessary.
 void runAppWithoutImplicitView(Widget app) {
   final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
   assert(binding.debugCheckZone('runApp'));
