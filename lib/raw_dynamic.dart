@@ -60,7 +60,7 @@ void _handleOnBeginFrame(Duration timeStamp) {
       );
     final Picture picture = recorder.endRecording();
 
-    final SceneBuilder sceneBuilder = SceneBuilder()
+    final SceneBuilder sceneBuilder = SceneBuilder(view.viewId)
       ..addPicture(Offset.zero, picture);
 
     view.render(sceneBuilder.build());
