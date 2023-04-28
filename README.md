@@ -14,6 +14,7 @@ Currently, it only supports macOS.
 1. In **the framework repo**, add the prototype remote and switch to the prototype branch:
 ```
 git remote add goderbauer https://github.com/goderbauer/flutter/
+git fetch goderbauer
 git checkout goderbauer/rawview
 ```
 
