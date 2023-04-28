@@ -23,6 +23,7 @@ git checkout goderbauer/rawview
 3. In **the engine repo**, add the prototype remote and switch to the prototype branch:
 ```
 git remote add loic-sharma https://github.com/loic-sharma/flutter-engine/
+git fetch loic-sharma
 git checkout loic-sharma/multiview-prototype
 ```
 
