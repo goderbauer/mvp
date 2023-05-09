@@ -6,41 +6,47 @@ outdated and/or have other issues. DO NOT DEPEND ON ANYTHING IN THIS REPOSITORY.
 
 ## How to use?
 
-This sample must be used with the correct revision of a custom engine.
+This sample is meant to be used with a custom (prototype) engine and framework.
 Currently, it only supports macOS.
 
-## Setup
-1. Set up the Engine development environment: See [the wiki page](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment).
-2. In **the engine repo**, add the prototype remote:
+0. Set up the Framework development environment: See [the wiki page](https://github.com/flutter/flutter/wiki/Setting-up-the-Framework-development-environment).
+
+1. In **the framework repo**, add the prototype remote and switch to the prototype branch:
+```
+git remote add goderbauer https://github.com/goderbauer/flutter/
+git fetch goderbauer
+git checkout goderbauer/rawview
+```
+
+2. Set up the Engine development environment: See [the wiki page](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment).
+
+3. In **the engine repo**, add the prototype remote and switch to the prototype branch:
 ```
 git remote add loic-sharma https://github.com/loic-sharma/flutter-engine/
+git fetch loic-sharma
+git checkout loic-sharma/multiview-prototype
 ```
-3. In **this repo**, edit `pubspec.yaml`, and add the following dependency override:
+
+4. In **this repo**, edit `pubspec.yaml`, and add the following dependency override to use the custom `dart:ui` library:
 ```
 dependency_overrides:
   sky_engine:
-    path: /path/to/flutter/engine/out/host_debug/gen/dart-pkg/sky_engine
+    path: /path/to/flutter/engine/out/host_debug_unopt/gen/dart-pkg/sky_engine
 ```
-This allows the sample to use the custom `dart:ui` library.
 
-## Build
-1. In **the engine repo**, checkout the prototype branch
-```
-git fetch loic-sharma
-git checkout 087d63a3d1f01da5646e4e76b8d81766fbaa79c6
-```
-2. Build the custom engine: See [the wiki page](https://github.com/flutter/flutter/wiki/Compiling-the-engine#compiling-for-macos-or-linux).
-3. In **this repo**, update packages.
+5. Build the custom engine: See [the wiki page](https://github.com/flutter/flutter/wiki/Compiling-the-engine#compiling-for-macos-or-linux).
+
+6. In **this repo**, update packages.
 ```
 flutter pub get
 ```
-4. Run the sample file with the custom engine. For example,
+
+7. Run a sample file (see below for options) with the custom engine. For example,
 ```
 flutter run --local-engine=host_debug_unopt -d macos -t lib/raw_dynamic.dart
 ```
-See below for the list of sample apps.
 
-5. If everything goes well, the app should start up with a window, then another window after 1 second.
+8. If everything goes well, the app should start up with a window, then another window after 1 second.
 
 ## Samples
 
@@ -54,3 +60,19 @@ added/removed.
 
 Renders a spinning rectangular into each `FlutterView` available in `PlatformDispatcher.views` using only APIs exposed
 by `dart:ui`. Frames are continuously scheduled to keep the animation running.
+
+### widgets_static.dart
+
+Renders some view-specific information into each `FlutterView` available in `PlatformDispatcher.views` using the Flutter
+widget framework (`package:flutter/widgets.dart`). A new frame is only scheduled if the metrics of a `FlutterView`
+change or if a view is added/removed.
+
+### widgets_dynamic.dart
+
+Renders a spinning rectangular into each `FlutterView` available in `PlatformDispatcher.views` using the Flutter
+widget framework (`package:flutter/widgets.dart`). Frames are continuously scheduled to keep the animation running.
+
+### widgets_counter.dart
+
+Renders the Counter app (an interactive Material Design app) into each `FlutterView` available in
+`PlatformDispatcher.views`.
