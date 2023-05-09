@@ -12,18 +12,9 @@ class AppDelegate: FlutterAppDelegate {
   }
 
   override func applicationDidFinishLaunching(_ aNotification: Notification) {
-      DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-        let newWindow = SideFlutterWindow(engine: MainFlutterWindow.engine!)
-        newWindow.title = "New Window"
-        newWindow.isOpaque = false
-        newWindow.center()
-        newWindow.isMovableByWindowBackground = true
-        newWindow.isReleasedWhenClosed = false
-        newWindow.backgroundColor = NSColor(calibratedHue: 0, saturation: 1.0, brightness: 0, alpha: 0.7)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-          newWindow.activate()
-          newWindow.makeKeyAndOrderFront(nil)
-        }
-      }
+    let newWindow = SideFlutterWindow(engine: MainFlutterWindow.engine!)
+    DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
+      let newWindow = SideFlutterWindow(engine: MainFlutterWindow.engine!)
+    }
   }
 }
