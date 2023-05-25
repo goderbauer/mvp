@@ -43,6 +43,7 @@ class SideFlutterWindow: NSWindow {
     self.setFrame(windowFrame, display: true)
     self.makeKeyAndOrderFront(nil)
     self.title = String(format: "Flutter Window #%llu", windowId())
+    self.isReleasedWhenClosed = false
 
     self.setFrameTopLeftPoint(windowOrigin(viewId: windowId()))
   }
