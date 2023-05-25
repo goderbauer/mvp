@@ -6,7 +6,7 @@ import Cocoa
 import FlutterMacOS
 
 func windowOrigin(viewId: Int64) -> CGPoint {
-  let screen = NSScreen.screens[2]
+  let screen = NSScreen.screens[min(2, NSScreen.screens.count - 1)]
   let topLeft = screen.visibleFrame.origin
   let x = CGFloat(viewId) * 300.0 + topLeft.x + 300.0
   let y = CGFloat(viewId) * 200.0 + topLeft.y + 1500.0
