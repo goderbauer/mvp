@@ -24,7 +24,7 @@ git checkout goderbauer/rawview
 ```
 git remote add loic-sharma https://github.com/loic-sharma/flutter-engine/
 git fetch loic-sharma
-git checkout 1cb65e423c2e8804d2d1c91613271e64ed49b76c
+git checkout 27c47f6721e9fe910c7ef8efc7e92ba279402619
 ```
 
 4. In **this repo**, edit `pubspec.yaml`, and add the following dependency override to use the custom `dart:ui` library:
