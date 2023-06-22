@@ -14,18 +14,12 @@ func windowOrigin(viewId: Int64) -> CGPoint {
 }
 
 class MainFlutterWindow: NSWindow {
-  static var engine: FlutterEngine?
-
-  override func awakeFromNib() {
-    super.awakeFromNib()
-    let flutterViewController = FlutterViewController()
-    MainFlutterWindow.engine = flutterViewController.engine;
+  func showFlutter(engine: FlutterEngine) {
+    let flutterViewController = FlutterViewController(engine: engine, nibName: nil, bundle: nil)
     let windowFrame = self.frame
+
     self.contentViewController = flutterViewController
     self.setFrame(windowFrame, display: true)
-
-    RegisterGeneratedPlugins(registry: flutterViewController)
-
     self.setFrameTopLeftPoint(windowOrigin(viewId: 0))
   }
 }
