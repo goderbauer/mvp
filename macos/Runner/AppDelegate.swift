@@ -7,14 +7,22 @@ import FlutterMacOS
 
 @NSApplicationMain
 class AppDelegate: FlutterAppDelegate {
+  lazy var flutterEngine = FlutterEngine(name: "io.flutter", project: nil, allowHeadlessExecution: true)
+
   override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
     return true
   }
 
   override func applicationDidFinishLaunching(_ aNotification: Notification) {
-    let newWindow = SideFlutterWindow(engine: MainFlutterWindow.engine!)
+    flutterEngine.run(withEntrypoint: nil)
+    RegisterGeneratedPlugins(registry: self.flutterEngine)
+
+    let mainWindow = self.mainFlutterWindow as! MainFlutterWindow
+    mainWindow.showFlutter(engine: flutterEngine)
+
+    let newWindow = SideFlutterWindow(engine: self.flutterEngine)
     DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
-      let newWindow = SideFlutterWindow(engine: MainFlutterWindow.engine!)
+      let newWindow = SideFlutterWindow(engine: self.flutterEngine)
     }
   }
 }
