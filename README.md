@@ -11,11 +11,9 @@ Currently, it only supports macOS.
 
 0. Set up the Framework development environment: See [the wiki page](https://github.com/flutter/flutter/wiki/Setting-up-the-Framework-development-environment).
 
-1. In **the framework repo**, add the prototype remote and switch to the prototype branch:
+1. In **the framework repo**, switch to the master branch:
 ```
-git remote add goderbauer https://github.com/goderbauer/flutter/
-git fetch goderbauer
-git checkout goderbauer/rawview
+git checkout master
 ```
 
 2. Set up the Engine development environment: See [the wiki page](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment).
