@@ -37,14 +37,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   Win32Window::Point origin(10, 10);
   Win32Window::Size size(1280, 720);
 
-  FlutterWindow window(engine);
+  FlutterWindow window1(engine);
   FlutterWindow window2(engine);
-  if (!window.Create(L"mvp", origin, size)) {
+  if (!window1.Create(L"Mvp", origin, size)
+    || !window2.Create(L"Window #2", origin, size)) {
     return EXIT_FAILURE;
   }
-  if (!window2.Create(L"Second window", origin, size)) {
-    return EXIT_FAILURE;
-  }
+
+  window1.SetQuitOnClose(true);
 
   ::MSG msg;
   while (::GetMessage(&msg, nullptr, 0, 0)) {
