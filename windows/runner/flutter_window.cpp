@@ -28,18 +28,11 @@ bool FlutterWindow::OnCreate() {
   }
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
-  // TODO(loicsharma): The engine cannot have multiple next frame callbacks.
-  // If multiple windows are created, only the last one will be shown.
-  // For now, we'll show windows immediately before the first frame is rendered.
-  // engine_->SetNextFrameCallback([&]() {
-  //   this->Show();
-  // });
-
-  // Flutter can complete the first frame before the "show window" callback is
-  // registered. The following call ensures a frame is pending to ensure the
-  // window is shown. It is a no-op if the first frame hasn't completed yet.
-  // flutter_controller_->ForceRedraw();
-
+  // TODO(loicsharma): Hide the window until the first frame is rendered.
+  // Single window apps use the engine's next frame callback to show the window.
+  // This doesn't work for multi window apps as the engine cannot have multiple
+  // next frame callbacks. If multiple windows are created, only the last one
+  // will be shown.
   return true;
 }
 
