@@ -34,13 +34,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
 
   RegisterPlugins(engine.get());
 
-  Win32Window::Point origin(10, 10);
+  Win32Window::Point origin1(10, 10);
+  Win32Window::Point origin2(50, 50);
   Win32Window::Size size(1280, 720);
 
   FlutterWindow window1(engine);
   FlutterWindow window2(engine);
-  if (!window1.Create(L"Mvp", origin, size)
-    || !window2.Create(L"Window #2", origin, size)) {
+  if (!window1.Create(L"Mvp", origin1, size)
+    || !window2.Create(L"Window #2", origin2, size)) {
     return EXIT_FAILURE;
   }
 
