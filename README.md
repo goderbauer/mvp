@@ -19,7 +19,7 @@ The demos in this repository run on the following platforms:
 | Platform | Support                                               |
 |----------|-------------------------------------------------------|
 | macOS    | ⚠️ with custom engine branch (see instructions below) |
-| Windows  | ❌                                                    |
+| Windows  | ⚠️ with custom engine branch (see instructions below) |
 | Linux    | ❌                                                    |
 
 ## How to use?
@@ -39,7 +39,7 @@ git checkout master
 ```
 git remote add loic-sharma https://github.com/loic-sharma/flutter-engine/
 git fetch loic-sharma
-git checkout 27c47f6721e9fe910c7ef8efc7e92ba279402619
+git checkout d3abea30310f4fdc3d2ae6d715695ae9e7642c9d
 ```
 
 4. In **this repo**, edit `pubspec.yaml`, and add the following dependency override to use the custom `dart:ui` library:

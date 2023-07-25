@@ -6,10 +6,8 @@
 
 #include <optional>
 
-#include "flutter/generated_plugin_registrant.h"
-
-FlutterWindow::FlutterWindow(const flutter::DartProject& project)
-    : project_(project) {}
+FlutterWindow::FlutterWindow(std::shared_ptr<flutter::FlutterEngine> engine)
+    : engine_(std::move(engine)) {}
 
 FlutterWindow::~FlutterWindow() {}
 
@@ -23,18 +21,18 @@ bool FlutterWindow::OnCreate() {
   // The size here must match the window dimensions to avoid unnecessary surface
   // creation / destruction in the startup path.
   flutter_controller_ = std::make_unique<flutter::FlutterViewController>(
-      frame.right - frame.left, frame.bottom - frame.top, project_);
+      frame.right - frame.left, frame.bottom - frame.top, engine_);
   // Ensure that basic setup of the controller was successful.
-  if (!flutter_controller_->engine() || !flutter_controller_->view()) {
+  if (!flutter_controller_->view()) {
     return false;
   }
-  RegisterPlugins(flutter_controller_->engine());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
-  flutter_controller_->engine()->SetNextFrameCallback([&]() {
-    this->Show();
-  });
-
+  // TODO(loicsharma): Hide the window until the first frame is rendered.
+  // Single window apps use the engine's next frame callback to show the window.
+  // This doesn't work for multi window apps as the engine cannot have multiple
+  // next frame callbacks. If multiple windows are created, only the last one
+  // will be shown.
   return true;
 }
 
@@ -62,7 +60,7 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
 
   switch (message) {
     case WM_FONTCHANGE:
-      flutter_controller_->engine()->ReloadSystemFonts();
+      engine_->ReloadSystemFonts();
       break;
   }
 
