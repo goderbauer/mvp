@@ -39,7 +39,7 @@ git checkout master
 ```
 git remote add loic-sharma https://github.com/loic-sharma/flutter-engine/
 git fetch loic-sharma
-git checkout d3abea30310f4fdc3d2ae6d715695ae9e7642c9d
+git checkout 2d9c4f5735423ed2558ce22f7fca62d047956ba4
 ```
 
 4. In **this repo**, edit `pubspec.yaml`, and add the following dependency override to use the custom `dart:ui` library:
