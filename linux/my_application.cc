@@ -73,7 +73,7 @@ static void my_application_activate(GApplication* application) {
 
   // Create a second window
   {
-    FlView* view2 = fl_view_new_with_engine(engine, 1000, 560);
+    FlView* view2 = fl_view_new_with_engine(engine, 1280, 720);
     // GtkWindow* window2 = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
     GtkWindow* window2 = GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
     if (use_header_bar) {
@@ -86,7 +86,7 @@ static void my_application_activate(GApplication* application) {
       gtk_window_set_title(window2, "mvp 2");
     }
 
-    gtk_window_set_default_size(window2, 1000, 560);
+    gtk_window_set_default_size(window2, 1280, 720);
     gtk_widget_show(GTK_WIDGET(window2));
     gtk_widget_show(GTK_WIDGET(view2));
     gtk_container_add(GTK_CONTAINER(window2), GTK_WIDGET(view2));
