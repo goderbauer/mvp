@@ -21,6 +21,17 @@ G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 // Implements GApplication::activate.
 static void my_application_activate(GApplication* application) {
   MyApplication* self = MY_APPLICATION(application);
+
+  // Launch the Flutter engine.
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  fl_dart_project_set_dart_entrypoint_arguments(project, self->dart_entrypoint_arguments);
+
+  FlEngine* engine = fl_engine_new_headless(project);
+
+  // Register plugins.
+  fl_register_plugins(FL_PLUGIN_REGISTRY(engine));
+
+  // Create window.
   GtkWindow* window =
       GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
 
@@ -54,16 +65,33 @@ static void my_application_activate(GApplication* application) {
   gtk_window_set_default_size(window, 1280, 720);
   gtk_widget_show(GTK_WIDGET(window));
 
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  fl_dart_project_set_dart_entrypoint_arguments(project, self->dart_entrypoint_arguments);
-
-  FlView* view = fl_view_new(project);
+  FlView* view = fl_view_new_with_engine(engine, 1280, 720);
   gtk_widget_show(GTK_WIDGET(view));
   gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(view));
 
-  fl_register_plugins(FL_PLUGIN_REGISTRY(view));
-
   gtk_widget_grab_focus(GTK_WIDGET(view));
+
+  // Create a second window
+  {
+    FlView* view2 = fl_view_new_with_engine(engine, 1000, 560);
+    // GtkWindow* window2 = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
+    GtkWindow* window2 = GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
+    if (use_header_bar) {
+      GtkHeaderBar* header_bar2 = GTK_HEADER_BAR(gtk_header_bar_new());
+      gtk_widget_show(GTK_WIDGET(header_bar2));
+      gtk_header_bar_set_title(header_bar2, "mvp 2");
+      gtk_header_bar_set_show_close_button(header_bar2, TRUE);
+      gtk_window_set_titlebar(window2, GTK_WIDGET(header_bar2));
+    } else {
+      gtk_window_set_title(window2, "mvp 2");
+    }
+
+    gtk_window_set_default_size(window2, 1000, 560);
+    gtk_widget_show(GTK_WIDGET(window2));
+    gtk_widget_show(GTK_WIDGET(view2));
+    gtk_container_add(GTK_CONTAINER(window2), GTK_WIDGET(view2));
+    gtk_widget_grab_focus(GTK_WIDGET(view2));
+  }
 }
 
 // Implements GApplication::local_command_line.
