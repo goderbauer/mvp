@@ -37,9 +37,9 @@ git checkout master
 
 3. In **the engine repo**, add the prototype remote and switch to the prototype branch:
 ```
-git remote add loic-sharma https://github.com/loic-sharma/flutter-engine/
-git fetch loic-sharma
-git checkout 04fe93f8b6e0a39cb525abed267354195b276901
+git remote add dkwingsmt https://github.com/dkwingsmt/engine/
+git fetch dkwingsmt
+git checkout a764aa916210e75520010b027e62dc47a1b4f80b
 ```
 
 4. In **this repo**, edit `pubspec.yaml`, and add the following dependency override to use the custom `dart:ui` library:
@@ -58,7 +58,7 @@ flutter pub get
 
 7. Run a sample file (see below for options) with the custom engine. For example,
 ```
-flutter run --local-engine=host_debug_unopt -d macos -t lib/raw_dynamic.dart
+flutter run --local-engine=host_debug_unopt --local-engine-host=host_debug_unopt -d macos -t lib/raw_dynamic.dart
 ```
 
 8. If everything goes well, the app should start up with a number of windows.
