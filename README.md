@@ -21,6 +21,7 @@ The demos in this repository run on the following platforms:
 | macOS    | ⚠️ with custom engine branch (see instructions below) |
 | Windows  | ⚠️ with custom engine branch (see instructions below) |
 | Linux    | ❌                                                    |
+| Web      | ✅   (`flutter run -d chrome`)                        |
 
 ## How to use?
 
