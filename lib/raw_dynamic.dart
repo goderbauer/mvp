@@ -28,7 +28,7 @@ void _handleOnMetricsChanged() {
 void _handleOnBeginFrame(Duration timeStamp) {
   for (final FlutterView view in PlatformDispatcher.instance.views) {
     final Size logicalSize = view.physicalSize / view.devicePixelRatio;
-    final Color color = _colors[(view.viewId as int) % _colors.length];
+    final Color color = _colors[view.viewId % _colors.length];
 
     final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
       ParagraphStyle(textDirection: TextDirection.ltr, fontSize: 24),

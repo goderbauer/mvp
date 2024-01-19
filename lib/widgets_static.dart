@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'src/widgets.dart';
 
 void main() {
-  runAppWithoutImplicitView(MultiViewApp(
+  runWidget(MultiViewApp(
     viewBuilder: (BuildContext context) => const HelloWorld(),
   ));
 }

@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'src/widgets.dart';
 
 void main() {
-  runAppWithoutImplicitView(MultiViewApp(
+  runWidget(MultiViewApp(
     viewBuilder: (BuildContext context) => const SpinningSquare(),
   ));
 }
@@ -32,7 +32,7 @@ class _SpinningSquareState extends State<SpinningSquare> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
-    final int viewId = View.of(context).viewId as int;
+    final int viewId = View.of(context).viewId;
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
