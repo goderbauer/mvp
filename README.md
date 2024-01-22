@@ -39,7 +39,7 @@ git checkout master
 3. In **the engine repo**, add the prototype remote and switch to the prototype branch:
 ```
 git remote add dkwingsmt https://github.com/dkwingsmt/engine/
-git fetch dkwingsmt
+git fetch dkwingsmt fffa6e19f5b71bedd55ac3a7fa6acfd85eda5983
 git checkout fffa6e19f5b71bedd55ac3a7fa6acfd85eda5983
 ```
 
