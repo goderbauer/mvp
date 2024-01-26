@@ -71,15 +71,3 @@ class _MultiViewAppState extends State<MultiViewApp> with WidgetsBindingObserver
     return ViewCollection(views: _views.values.toList(growable: false));
   }
 }
-
-// TODO(goderbauer): Add this to the framework.
-/// This is like [runApp] but without a call to
-/// [WidgetsBinding.wrapWithDefaultView]. The provided `app` must instantiate
-/// [View] widgets where necessary.
-void runAppWithoutImplicitView(Widget app) {
-  final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
-  assert(binding.debugCheckZone('runApp'));
-  binding
-    ..scheduleAttachRootWidget(app) // ignore: invalid_use_of_protected_member
-    ..scheduleWarmUpFrame();
-}
