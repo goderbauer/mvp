@@ -36,16 +36,9 @@ git checkout master
 
 2. Set up the Engine development environment: See [the wiki page](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment).
 
-3. In **the engine repo**, apply this playground's patches:
+3. Windows only: in **the engine repo**, apply this playground's patch:
 ```
 git apply /path/to/playground/patches/001-Add-multi-view-Flutter-Windows-C++-APIs.patch
-```
-
-4. In **this repo**, edit `pubspec.yaml`, and add the following dependency override to use the custom `dart:ui` library:
-```
-dependency_overrides:
-  sky_engine:
-    path: /path/to/flutter/engine/out/host_debug_unopt/gen/dart-pkg/sky_engine
 ```
 
 5. Build the custom engine: See [the wiki page](https://github.com/flutter/flutter/wiki/Compiling-the-engine#compiling-for-macos-or-linux).
