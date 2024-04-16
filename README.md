@@ -19,7 +19,7 @@ The demos in this repository run on the following platforms:
 | Platform | Support                                               |
 |----------|-------------------------------------------------------|
 | macOS    | ⚠️ with custom engine branch (see instructions below) |
-| Windows  | ⚠️ with custom engine branch (see instructions below) |
+| Windows  | ⚠️ with engine patch (see instructions below)         |
 | Linux    | ❌                                                    |
 | Web      | ✅   (`flutter run -d chrome`)                        |
 
@@ -36,11 +36,9 @@ git checkout master
 
 2. Set up the Engine development environment: See [the wiki page](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment).
 
-3. In **the engine repo**, add the prototype remote and switch to the prototype branch:
+3. In **the engine repo**, apply this playground's patches:
 ```
-git remote add dkwingsmt https://github.com/dkwingsmt/engine/
-git fetch dkwingsmt fffa6e19f5b71bedd55ac3a7fa6acfd85eda5983
-git checkout fffa6e19f5b71bedd55ac3a7fa6acfd85eda5983
+git apply /path/to/playground/patches/001-Add-multi-view-Flutter-Windows-C++-APIs.patch
 ```
 
 4. In **this repo**, edit `pubspec.yaml`, and add the following dependency override to use the custom `dart:ui` library:
