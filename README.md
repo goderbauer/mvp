@@ -44,35 +44,27 @@ git checkout master
    git checkout fffa6e19f5b71bedd55ac3a7fa6acfd85eda5983
    ```
 
-4. macOS only: in **this repo**, edit pubspec.yaml, and add the following dependency override to use the custom `dart:ui` library:
-
-   ```yaml
-   dependency_overrides:
-     sky_engine:
-       path: /path/to/flutter/engine/out/host_debug_unopt/gen/dart-pkg/sky_engine
-   ```
-
-5. Windows only: in **the engine repo**, apply this playground's patch:
+4. Windows only: in **the engine repo**, apply this playground's patch:
 
    ```bash
    git apply /path/to/playground/patches/001-Add-multi-view-Flutter-Windows-C++-APIs.patch
    ```
 
-7. Build the custom engine: see [the wiki page](https://github.com/flutter/flutter/wiki/Compiling-the-engine#compiling-for-macos-or-linux).
+5. Build the custom engine: see [the wiki page](https://github.com/flutter/flutter/wiki/Compiling-the-engine#compiling-for-macos-or-linux).
 
-8. In **this repo**, update packages.
+6. In **this repo**, update packages.
 
    ```bash
    flutter pub get
    ```
 
-8. Run a sample file (see below for options) with the custom engine. For example,
+7. Run a sample file (see below for options) with the custom engine. For example,
 
    ```bash
    flutter run --local-engine=host_debug_unopt --local-engine-host=host_debug_unopt -d macos -t lib/raw_dynamic.dart
    ```
 
-10. If everything goes well, the app should start up with a number of windows.
+8. If everything goes well, the app should start up with a number of windows.
 
 ## Samples
 
