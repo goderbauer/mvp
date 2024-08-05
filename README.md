@@ -27,31 +27,42 @@ The demos in this repository run on the following platforms:
 
 The samples are meant to be used with a custom (prototype) engine using the master branch of the framework.
 
-0. Set up the Framework development environment: See [the wiki page](https://github.com/flutter/flutter/wiki/Setting-up-the-Framework-development-environment).
+0. Set up the Framework development environment: see [the wiki page](https://github.com/flutter/flutter/wiki/Setting-up-the-Framework-development-environment).
 
 1. In **the framework repo**, switch to the master branch:
 ```
 git checkout master
 ```
 
-2. Set up the Engine development environment: See [the wiki page](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment).
+2. Set up the Engine development environment: see [the wiki page](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment).
 
-3. Windows only: in **the engine repo**, apply this playground's patch:
-```
-git apply /path/to/playground/patches/001-Add-multi-view-Flutter-Windows-C++-APIs.patch
-```
+3. macOS only: in **the engine repo**, add the prototype remote and switch to the prototype branch:
 
-5. Build the custom engine: See [the wiki page](https://github.com/flutter/flutter/wiki/Compiling-the-engine#compiling-for-macos-or-linux).
+   ```bash
+   git remote add dkwingsmt https://github.com/dkwingsmt/engine/
+   git fetch dkwingsmt fffa6e19f5b71bedd55ac3a7fa6acfd85eda5983
+   git checkout fffa6e19f5b71bedd55ac3a7fa6acfd85eda5983
+   ```
+
+4. Windows only: in **the engine repo**, apply this playground's patch:
+
+   ```bash
+   git apply /path/to/playground/patches/001-Add-multi-view-Flutter-Windows-C++-APIs.patch
+   ```
+
+5. Build the custom engine: see [the wiki page](https://github.com/flutter/flutter/wiki/Compiling-the-engine#compiling-for-macos-or-linux).
 
 6. In **this repo**, update packages.
-```
-flutter pub get
-```
+
+   ```bash
+   flutter pub get
+   ```
 
 7. Run a sample file (see below for options) with the custom engine. For example,
-```
-flutter run --local-engine=host_debug_unopt --local-engine-host=host_debug_unopt -d macos -t lib/raw_dynamic.dart
-```
+
+   ```bash
+   flutter run --local-engine=host_debug_unopt --local-engine-host=host_debug_unopt -d macos -t lib/raw_dynamic.dart
+   ```
 
 8. If everything goes well, the app should start up with a number of windows.
 
