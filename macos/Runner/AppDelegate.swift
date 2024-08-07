@@ -13,6 +13,10 @@ class AppDelegate: FlutterAppDelegate {
     return true
   }
 
+  override func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
+    return true
+  }
+
   override func applicationDidFinishLaunching(_ aNotification: Notification) {
     flutterEngine.run(withEntrypoint: nil)
     RegisterGeneratedPlugins(registry: self.flutterEngine)
@@ -20,9 +24,9 @@ class AppDelegate: FlutterAppDelegate {
     let mainWindow = self.mainFlutterWindow as! MainFlutterWindow
     mainWindow.showFlutter(engine: flutterEngine)
 
-    let newWindow = SideFlutterWindow(engine: self.flutterEngine)
+    let _ = SideFlutterWindow(engine: self.flutterEngine)
     DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
-      let newWindow = SideFlutterWindow(engine: self.flutterEngine)
+      let _ = SideFlutterWindow(engine: self.flutterEngine)
     }
   }
 }
