@@ -1,0 +1,460 @@
+From 776468a688cea71159a600ff1da6e50c8861993a Mon Sep 17 00:00:00 2001
+From: Tong Mu <dkwingsmt@gmail.com>
+Date: Tue, 6 Aug 2024 16:47:41 -0700
+Subject: [PATCH] Updates `FlutterViewController` and `FlutterEngine` and
+ allows creating multiple windows on macOS:
+
+1. It makes API related to multiple views public
+2. It adds to `FlutterEngine` logic related to handling multiple views
+3. It updates documentation with handling multiple views
+---
+ .../macos/framework/Headers/FlutterEngine.h   |  45 +++++
+ .../Headers/FlutterPluginRegistrarMacOS.h     |   8 +
+ .../framework/Headers/FlutterViewController.h |  37 ++--
+ .../macos/framework/Source/FlutterEngine.mm   | 191 ++++++++++++++++--
+ .../framework/Source/FlutterEngine_Internal.h |  29 ---
+ 5 files changed, 244 insertions(+), 66 deletions(-)
+
+diff --git a/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h b/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h
+index 306bfceb08..f8abb8bcac 100644
+--- a/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h
++++ b/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h
+@@ -91,6 +91,51 @@ FLUTTER_DARWIN_EXPORT
+  */
+ @property(nonatomic, nonnull, readonly) id<FlutterBinaryMessenger> binaryMessenger;
+
++/**
++ * Attach a view controller that has been detached.
++ *
++ * If the engine currently doesn't have the implicit view, then this view controller
++ * will be associated with the implicit view. Otherwise, this view controller
++ * will received a new unique view ID. This seemingly complicated rule is necessary
++ * to provide backward compatibility to apps that removes and re-assigns the
++ * implicit view, so that these apps continue to work even with plugins that
++ * involve additional views. The re-assigning process looks like this:
++ *
++ * ```swift
++ *   let engine = FlutterEngine(..., allowHeadlessExecution: true)
++ *   // Create the first view controller for the implicit view.
++ *   let flutterViewController1 = FlutterViewController(engine: engine, ...)
++ *   // Detach the first view controller from the engine.
++ *   engine.viewController = nil
++ *   // Create a new view controller. This attaches to the implicit view.
++ *   let flutterViewController2 = FlutterViewController(engine: engine, ...)
++ * ```
++ *
++ * The engine holds a weak reference to the attached view controller.
++ *
++ * If the given view controller is already attached to an engine, this call
++ * throws an assertion.
++ */
++- (void)addViewController:(nonnull FlutterViewController*)viewController;
++
++/**
++ * Dissociate the given view controller from this engine.
++ *
++ * Detach a view controller.
++ *
++ * The view controller will no longer be usable until reattached to an engine.
++ *
++ * If the given view controller is not attached to an engine, this call
++ * throws an assertion.
++ */
++- (void)removeViewController:(nonnull FlutterViewController*)viewController;
++
++/**
++ * The |FlutterViewController| associated with the given view ID, if any.
++ */
++- (nullable FlutterViewController*)viewControllerForIdentifier:
++    (FlutterViewIdentifier)viewIdentifier;
++
+ /**
+  * Shuts the Flutter engine if it is running. The FlutterEngine instance must always be shutdown
+  * before it may be collected. Not shutting down the FlutterEngine instance before releasing it will
+diff --git a/shell/platform/darwin/macos/framework/Headers/FlutterPluginRegistrarMacOS.h b/shell/platform/darwin/macos/framework/Headers/FlutterPluginRegistrarMacOS.h
+index 5b990dd84d..535379c3e2 100644
+--- a/shell/platform/darwin/macos/framework/Headers/FlutterPluginRegistrarMacOS.h
++++ b/shell/platform/darwin/macos/framework/Headers/FlutterPluginRegistrarMacOS.h
+@@ -17,6 +17,14 @@
+ // TODO(stuartmorgan): Merge this file and FlutterPluginMacOS.h with the iOS FlutterPlugin.h,
+ // sharing all but the platform-specific methods.
+
++/**
++ * A unique identifier for a view within which Flutter content is hosted.
++ *
++ * Identifiers are guaranteed to be unique for views owned by a given engine but
++ * can collide for views owned by different engines.
++ */
++typedef int64_t FlutterViewIdentifier;
++
+ /**
+  * The protocol for an object managing registration for a plugin. It provides access to application
+  * context, as allowing registering for callbacks for handling various conditions.
+diff --git a/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h b/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h
+index f20aea4125..71184df028 100644
+--- a/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h
++++ b/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h
+@@ -12,14 +12,6 @@
+ #import "FlutterPlatformViews.h"
+ #import "FlutterPluginRegistrarMacOS.h"
+
+-/**
+- * A unique identifier for a view within which Flutter content is hosted.
+- *
+- * Identifiers are guaranteed to be unique for views owned by a given engine but
+- * may collide for views owned by different engines.
+- */
+-typedef int64_t FlutterViewIdentifier;
+-
+ /**
+  * Values for the `mouseTrackingMode` property.
+  */
+@@ -87,10 +79,22 @@ FLUTTER_DARWIN_EXPORT
+  * Initializes a controller that will run the given project.
+  *
+  * In this initializer, this controller creates an engine, and is attached to
+- * that engine as the default controller. In this way, this controller can not
+- * be set to other engines. This initializer is suitable for the first Flutter
+- * view controller of the app. To use the controller with an existing engine,
+- * use initWithEngine:nibName:bundle: instead.
++ * that engine as the implicit view.
++ *
++ * This initializer is a shorthand for creating an engine explicitly and
++ * initializing with `initWithEngine:nibName:bundle:`.
++ *
++ * Since the created engine is only referred by this view controller, once the
++ * view controller is deallocated, the engine will be shut down, unless another
++ * strong referrence to the engine is kept. It is recommended to use
++ * `initWithEngine:nibName:bundle:` if the app's implicit view might be closed
++ * at some point, such as running headlessly.
++ *
++ * The engine holds a weak reference to the view controller, while the view controller
++ * holds a strong reference to the engine.
++ *
++ * For an introduction to implicit views, see
++ * [PlatformDispatcher.implicitView](https://api.flutter.dev/flutter/dart-ui/PlatformDispatcher/implicitView.html).
+  *
+  * @param project The project to run in this view controller. If nil, a default `FlutterDartProject`
+  *                will be used.
+@@ -103,12 +107,11 @@ FLUTTER_DARWIN_EXPORT
+     NS_DESIGNATED_INITIALIZER;
+ - (nonnull instancetype)initWithCoder:(nonnull NSCoder*)nibNameOrNil NS_DESIGNATED_INITIALIZER;
+ /**
+- * Initializes this FlutterViewController with an existing `FlutterEngine`.
+- *
+- * The initialized view controller will add itself to the engine as part of this process.
++ * Initializes this FlutterViewController and attaches it to an existing
++ * `FlutterEngine`.
+  *
+- * This initializer is suitable for both the first Flutter view controller and
+- * the following ones of the app.
++ * The engine holds a weak reference to the view controller, while the view controller
++ * holds a strong reference to the engine.
+  *
+  * @param engine The `FlutterEngine` instance to attach to. Cannot be nil.
+  * @param nibName The NIB name to initialize this controller with.
+diff --git a/shell/platform/darwin/macos/framework/Source/FlutterEngine.mm b/shell/platform/darwin/macos/framework/Source/FlutterEngine.mm
+index 2c79ee079d..58c9776ad3 100644
+--- a/shell/platform/darwin/macos/framework/Source/FlutterEngine.mm
++++ b/shell/platform/darwin/macos/framework/Source/FlutterEngine.mm
+@@ -181,6 +181,24 @@ constexpr char kTextPlainFormat[] = "text/plain";
+  */
+ - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
+
++/**
++ * Notifies the Engine of the addition of the specified view.
++ *
++ * This method might be called in addViewController or when the engine is
++ * launched, whichever comes the last.
++ */
++- (void)addViewToEmbedderEngine:(FlutterViewController*)viewController;
++
++/**
++ * Notifies the Engine of the removal of the specified view.
++ */
++- (void)removeViewFromEmbedderEngine:(FlutterViewIdentifier)viewIdentifier;
++
++/**
++ * Generate a new view ID for non-implicit views.
++ */
++- (FlutterViewIdentifier)generateRegularViewIdentifier;
++
+ @end
+
+ #pragma mark -
+@@ -457,6 +475,9 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, void* user_
+
+   FlutterThreadSynchronizer* _threadSynchronizer;
+
++  // The next available view ID for non-implicit views.
++  FlutterViewIdentifier _nextRegularViewIdentifier;
++
+   // Whether the application is currently the active application.
+   BOOL _active;
+
+@@ -513,6 +534,8 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
+   _binaryMessenger = [[FlutterBinaryMessengerRelay alloc] initWithParent:self];
+   _isResponseValid = [[NSMutableArray alloc] initWithCapacity:1];
+   [_isResponseValid addObject:@YES];
++  // kFlutterImplicitViewId is reserved for the implicit view.
++  _nextRegularViewIdentifier = kFlutterImplicitViewId + 1;
+
+   _embedderAPI.struct_size = sizeof(FlutterEngineProcTable);
+   FlutterEngineGetProcAddresses(&_embedderAPI);
+@@ -527,6 +550,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
+                            object:nil];
+
+   _platformViewController = [[FlutterPlatformViewController alloc] init];
++
+   _threadSynchronizer = [[FlutterThreadSynchronizer alloc] init];
+   // The macOS compositor must be initialized in the initializer because it is
+   // used when adding views, which might happen before runWithEntrypoint.
+@@ -699,6 +723,11 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
+   NSEnumerator* viewControllerEnumerator = [_viewControllers objectEnumerator];
+   FlutterViewController* nextViewController;
+   while ((nextViewController = [viewControllerEnumerator nextObject])) {
++    FlutterViewIdentifier viewIdentifier = nextViewController.viewIdentifier;
++    // The implicit view should never be sent to the embedder API.
++    if (viewIdentifier != kFlutterImplicitViewId) {
++      [self addViewToEmbedderEngine:nextViewController];
++    }
+     [self updateWindowMetricsForViewController:nextViewController];
+   }
+
+@@ -893,14 +922,30 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
+ #pragma mark - Framework-internal methods
+
+ - (void)addViewController:(FlutterViewController*)controller {
+-  // FlutterEngine can only handle the implicit view for now. Adding more views
+-  // throws an assertion.
+-  NSAssert(self.viewController == nil,
+-           @"The engine already has a view controller for the implicit view.");
+-  self.viewController = controller;
++  if (self.viewController == nil) {
++    self.viewController = controller;
++    return;
++  }
++  FlutterViewIdentifier viewIdentifier = [self generateRegularViewIdentifier];
++  [self registerViewController:controller forIdentifier:viewIdentifier];
++  if (_engine != nullptr) {
++    return [self addViewToEmbedderEngine:controller];
++  } else {
++    // The embedder will be notified of the new view when it's launched.
++  }
+ }
+
+ - (void)removeViewController:(nonnull FlutterViewController*)viewController {
++  if (self.viewController == viewController) {
++    self.viewController = nil;
++    return;
++  }
++  if (_engine != nullptr) {
++    [self removeViewFromEmbedderEngine:viewController.viewIdentifier];
++  } else {
++    // Since the engine has not started, view has never been sent to the
++    // embedder.
++  }
+   [self deregisterViewControllerForIdentifier:viewController.viewIdentifier];
+   [self shutDownIfNeeded];
+ }
+@@ -986,27 +1031,32 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
+   return [[[NSProcessInfo processInfo] arguments] firstObject] ?: @"Flutter";
+ }
+
++void _populateMetricsEvent(FlutterViewController* viewController,
++                           FlutterWindowMetricsEvent* event) {
++  NSView* view = viewController.flutterView;
++  CGRect scaledBounds = [view convertRectToBacking:view.bounds];
++  CGSize scaledSize = scaledBounds.size;
++  double pixelRatio = view.bounds.size.width == 0 ? 1 : scaledSize.width / view.bounds.size.width;
++  auto displayId = [view.window.screen.deviceDescription[@"NSScreenNumber"] integerValue];
++
++  event->struct_size = sizeof(FlutterWindowMetricsEvent);
++  event->width = static_cast<size_t>(scaledSize.width);
++  event->height = static_cast<size_t>(scaledSize.height);
++  event->pixel_ratio = pixelRatio;
++  event->left = static_cast<size_t>(scaledBounds.origin.x);
++  event->top = static_cast<size_t>(scaledBounds.origin.y);
++  event->display_id = static_cast<uint64_t>(displayId);
++  event->view_id = viewController.viewIdentifier;
++}
++
+ - (void)updateWindowMetricsForViewController:(FlutterViewController*)viewController {
+   if (!_engine || !viewController || !viewController.viewLoaded) {
+     return;
+   }
+   NSAssert([self viewControllerForIdentifier:viewController.viewIdentifier] == viewController,
+            @"The provided view controller is not attached to this engine.");
+-  NSView* view = viewController.flutterView;
+-  CGRect scaledBounds = [view convertRectToBacking:view.bounds];
+-  CGSize scaledSize = scaledBounds.size;
+-  double pixelRatio = view.bounds.size.width == 0 ? 1 : scaledSize.width / view.bounds.size.width;
+-  auto displayId = [view.window.screen.deviceDescription[@"NSScreenNumber"] integerValue];
+-  const FlutterWindowMetricsEvent windowMetricsEvent = {
+-      .struct_size = sizeof(windowMetricsEvent),
+-      .width = static_cast<size_t>(scaledSize.width),
+-      .height = static_cast<size_t>(scaledSize.height),
+-      .pixel_ratio = pixelRatio,
+-      .left = static_cast<size_t>(scaledBounds.origin.x),
+-      .top = static_cast<size_t>(scaledBounds.origin.y),
+-      .display_id = static_cast<uint64_t>(displayId),
+-      .view_id = viewController.viewIdentifier,
+-  };
++  FlutterWindowMetricsEvent windowMetricsEvent{};
++  _populateMetricsEvent(viewController, &windowMetricsEvent);
+   _embedderAPI.SendWindowMetricsEvent(_engine, &windowMetricsEvent);
+ }
+
+@@ -1049,6 +1099,107 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
+
+ #pragma mark - Private methods
+
++- (void)addViewToEmbedderEngine:(FlutterViewController*)controller {
++  struct Captures {
++    fml::AutoResetWaitableEvent latch;
++    bool added;
++  };
++  Captures captures = {};
++
++  FlutterWindowMetricsEvent windowMetricsEvent{};
++  _populateMetricsEvent(controller, &windowMetricsEvent);
++  FlutterAddViewInfo info{
++      .struct_size = sizeof(FlutterAddViewInfo),
++      .view_id = controller.viewIdentifier,
++      .view_metrics = &windowMetricsEvent,
++      .user_data = &captures,
++      .add_view_callback =
++          [](const FlutterAddViewResult* result) {
++            // This is invoked on an engine thread. If
++            // |FlutterRemoveViewResult.added| is `true`, the engine guarantees the
++            // view won't be presented.
++            Captures* captures = reinterpret_cast<Captures*>(result->user_data);
++            NSLog(@"Received added callback... %llx", (uint64_t)(void*)captures);
++            captures->added = result->added;
++            captures->latch.Signal();
++          },
++  };
++  FlutterEngineResult result = _embedderAPI.AddView(_engine, &info);
++  if (result != kSuccess) {
++    FML_LOG(ERROR) << "Starting the add view operation failed. "
++                      "FlutterEngineAddView "
++                      "returned an unexpected result: "
++                   << result << ". This indicates a bug in the macOS embedder.";
++    FML_DCHECK(false);
++    return;
++  }
++
++  // Block the platform thread until the engine has removed the view.
++  // TODO(loicsharma): This blocks the platform thread eagerly and can
++  // cause unnecessary delay in input processing. Instead, this should block
++  // lazily only when an operation needs the view.
++  // https://github.com/flutter/flutter/issues/146248
++  captures.latch.Wait();
++  if (!captures.added) {
++    FML_LOG(ERROR) << "The add view operation failed. "
++                      "The callback returned failure. "
++                   << "This indicates a bug in the macOS embedder.";
++    FML_DCHECK(false);
++    return;
++  }
++}
++
++- (void)removeViewFromEmbedderEngine:(FlutterViewIdentifier)viewIdentifier {
++  struct Captures {
++    fml::AutoResetWaitableEvent latch;
++    bool removed;
++  };
++  Captures captures = {};
++  FlutterRemoveViewInfo info{
++      .struct_size = sizeof(FlutterRemoveViewInfo),
++      .view_id = viewIdentifier,
++      .user_data = &captures,
++      .remove_view_callback =
++          [](const FlutterRemoveViewResult* result) {
++            // This is invoked on an engine thread. If
++            // |FlutterRemoveViewResult.removed| is `true`, the engine guarantees the
++            // view won't be presented.
++            Captures* captures = reinterpret_cast<Captures*>(result->user_data);
++            captures->removed = result->removed;
++            captures->latch.Signal();
++          },
++  };
++  FlutterEngineResult result = _embedderAPI.RemoveView(_engine, &info);
++  if (result != kSuccess) {
++    FML_LOG(ERROR) << "Starting the remove view operation failed. "
++                      "FlutterEngineRemoveView "
++                      "returned an unexpected result: "
++                   << result << ". This indicates a bug in the macOS embedder.";
++    FML_DCHECK(false);
++    return;
++  }
++
++  // Block the platform thread until the engine has removed the view.
++  // TODO(loicsharma): This blocks the platform thread eagerly and can
++  // cause unnecessary delay in input processing. Instead, this should block
++  // lazily only when an operation needs the view.
++  // https://github.com/flutter/flutter/issues/146248
++  captures.latch.Wait();
++  if (!captures.removed) {
++    FML_LOG(ERROR) << "The remove view operation failed. "
++                      "The callback returned failure. "
++                   << "This indicates a bug in the macOS embedder.";
++    FML_DCHECK(false);
++    return;
++  }
++}
++
++- (FlutterViewIdentifier)generateRegularViewIdentifier {
++  FlutterViewIdentifier result = _nextRegularViewIdentifier;
++  _nextRegularViewIdentifier += 1;
++  return result;
++}
++
+ - (void)sendUserLocales {
+   if (!self.running) {
+     return;
+diff --git a/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h b/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h
+index d1c328a226..9b53a59e39 100644
+--- a/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h
++++ b/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h
+@@ -121,40 +121,11 @@ typedef NS_ENUM(NSInteger, FlutterAppExitResponse) {
+  */
+ @property(nonatomic, readonly) FlutterEngineTerminationHandler* terminationHandler;
+
+-/**
+- * Attach a view controller to the engine as its default controller.
+- *
+- * Since FlutterEngine can only handle the implicit view for now, the given
+- * controller will always be assigned to the implicit view, if there isn't an
+- * implicit view yet. If the engine already has an implicit view, this call
+- * throws an assertion.
+- *
+- * The engine holds a weak reference to the attached view controller.
+- *
+- * If the given view controller is already attached to an engine, this call
+- * throws an assertion.
+- */
+-- (void)addViewController:(FlutterViewController*)viewController;
+-
+ /**
+  * Notify the engine that a view for the given view controller has been loaded.
+  */
+ - (void)viewControllerViewDidLoad:(FlutterViewController*)viewController;
+
+-/**
+- * Dissociate the given view controller from this engine.
+- *
+- * If the view controller is not associated with this engine, this call throws an
+- * assertion.
+- */
+-- (void)removeViewController:(FlutterViewController*)viewController;
+-
+-/**
+- * The |FlutterViewController| associated with the given view ID, if any.
+- */
+-- (nullable FlutterViewController*)viewControllerForIdentifier:
+-    (FlutterViewIdentifier)viewIdentifier;
+-
+ /**
+  * Informs the engine that the specified view controller's window metrics have changed.
+  */

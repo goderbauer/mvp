@@ -36,18 +36,17 @@ git checkout master
 
 2. Set up the Engine development environment: see [the wiki page](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment).
 
-3. macOS only: in **the engine repo**, add the prototype remote and switch to the prototype branch:
+3. Apply patches depending on platform.
+* macOS only: in **the engine repo**, apply this playground's patch:
 
    ```bash
-   git remote add dkwingsmt https://github.com/dkwingsmt/engine/
-   git fetch dkwingsmt fffa6e19f5b71bedd55ac3a7fa6acfd85eda5983
-   git checkout fffa6e19f5b71bedd55ac3a7fa6acfd85eda5983
+   git apply /path/to/playground/patches/macos/001-Add-multi-view-Flutter-macOS-APIs.patch
    ```
 
-4. Windows only: in **the engine repo**, apply this playground's patch:
+* Windows only: in **the engine repo**, apply this playground's patch:
 
    ```bash
-   git apply /path/to/playground/patches/001-Add-multi-view-Flutter-Windows-C++-APIs.patch
+   git apply /path/to/playground/patches/windows/001-Add-multi-view-Flutter-Windows-C++-APIs.patch
    ```
 
 5. Build the custom engine: see [the wiki page](https://github.com/flutter/flutter/wiki/Compiling-the-engine#compiling-for-macos-or-linux).

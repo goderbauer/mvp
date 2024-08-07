@@ -43,6 +43,6 @@ class SideFlutterWindow: NSWindow {
   }
 
   func windowId() -> Int64 {
-    return (self.contentViewController as! FlutterViewController).viewId
+    return (self.contentViewController as! FlutterViewController).viewIdentifier
   }
 }

@@ -5,11 +5,15 @@
 import Cocoa
 import FlutterMacOS
 
-@NSApplicationMain
+@main
 class AppDelegate: FlutterAppDelegate {
   lazy var flutterEngine = FlutterEngine(name: "io.flutter", project: nil, allowHeadlessExecution: true)
 
   override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+    return true
+  }
+
+  override func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
     return true
   }
 
@@ -20,9 +24,9 @@ class AppDelegate: FlutterAppDelegate {
     let mainWindow = self.mainFlutterWindow as! MainFlutterWindow
     mainWindow.showFlutter(engine: flutterEngine)
 
-    let newWindow = SideFlutterWindow(engine: self.flutterEngine)
+    let _ = SideFlutterWindow(engine: self.flutterEngine)
     DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
-      let newWindow = SideFlutterWindow(engine: self.flutterEngine)
+      let _ = SideFlutterWindow(engine: self.flutterEngine)
     }
   }
 }
