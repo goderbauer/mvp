@@ -18,8 +18,8 @@ The demos in this repository run on the following platforms:
 
 | Platform | Support                                               |
 |----------|-------------------------------------------------------|
-| macOS    | ⚠️ with custom engine branch (see instructions below) |
-| Windows  | ⚠️ with engine patch (see instructions below)         |
+| macOS    | ⚠️ with engine patch (see instructions below)          |
+| Windows  | ⚠️ with engine patch (see instructions below)          |
 | Linux    | ❌                                                    |
 | Web      | ✅   (`flutter run -d chrome`)                        |
 
