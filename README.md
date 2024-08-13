@@ -36,34 +36,34 @@ git checkout master
 
 2. Set up the Engine development environment: see [the wiki page](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment).
 
-3. Apply patches depending on platform.
-* macOS only: in **the engine repo**, apply this playground's patch:
+3. Apply patches depending on platform:
+  * macOS only: in **the engine repo**, apply this playground's patch:
 
-   ```bash
-   git apply /path/to/playground/patches/macos/001-Add-multi-view-Flutter-macOS-APIs.patch
-   ```
+     ```bash
+     git apply /path/to/playground/patches/macos/001-Add-multi-view-Flutter-macOS-APIs.patch
+     ```
 
-* Windows only: in **the engine repo**, apply this playground's patch:
+  * Windows only: in **the engine repo**, apply this playground's patch:
+  
+     ```bash
+     git apply /path/to/playground/patches/windows/001-Add-multi-view-Flutter-Windows-C++-APIs.patch
+     ```
 
-   ```bash
-   git apply /path/to/playground/patches/windows/001-Add-multi-view-Flutter-Windows-C++-APIs.patch
-   ```
+4. Build the custom engine: see [the wiki page](https://github.com/flutter/flutter/wiki/Compiling-the-engine#compiling-for-macos-or-linux).
 
-5. Build the custom engine: see [the wiki page](https://github.com/flutter/flutter/wiki/Compiling-the-engine#compiling-for-macos-or-linux).
-
-6. In **this repo**, update packages.
+5. In **this repo**, update packages.
 
    ```bash
    flutter pub get
    ```
 
-7. Run a sample file (see below for options) with the custom engine. For example,
+6. Run a sample file (see below for options) with the custom engine. For example,
 
    ```bash
    flutter run --local-engine=host_debug_unopt --local-engine-host=host_debug_unopt -d macos -t lib/raw_dynamic.dart
    ```
 
-8. If everything goes well, the app should start up with a number of windows.
+7. If everything goes well, the app should start up with a number of windows.
 
 ## Samples
 
