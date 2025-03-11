@@ -29,7 +29,7 @@ The samples are meant to be used with a custom (prototype) engine using the mast
 
 0. Set up the Framework development environment: see [the wiki page](https://github.com/flutter/flutter/wiki/Setting-up-the-Framework-development-environment).
 
-1. Set up the Engine development environment: see [the wiki page](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment).
+1. Set up the Engine development environment: see [the wiki page](https://github.com/flutter/flutter/blob/master/engine/src/flutter/docs/contributing/Setting-up-the-Engine-development-environment.md).
 
 2. In **the Flutter repo**, switch to the main branch:
 ```
