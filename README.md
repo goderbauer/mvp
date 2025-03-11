@@ -27,7 +27,7 @@ The demos in this repository run on the following platforms:
 
 The samples are meant to be used with a custom (prototype) engine using the master branch of the framework.
 
-0. Set up the Framework development environment: see [the wiki page](https://github.com/flutter/flutter/wiki/Setting-up-the-Framework-development-environment).
+0. Set up the Framework development environment: see [the wiki page](https://github.com/flutter/flutter/blob/master/docs/contributing/Setting-up-the-Framework-development-environment.md).
 
 1. Set up the Engine development environment: see [the wiki page](https://github.com/flutter/flutter/blob/master/engine/src/flutter/docs/contributing/Setting-up-the-Engine-development-environment.md).
 
@@ -49,7 +49,7 @@ git checkout main
      git apply /path/to/playground/patches/windows/001-Add-multi-view-Flutter-Windows-C++-APIs.patch
      ```
 
-4. Build the custom engine: see [the wiki page](https://github.com/flutter/flutter/wiki/Compiling-the-engine#compiling-for-macos-or-linux).
+4. Build the custom engine: see [the wiki page](https://github.com/flutter/flutter/blob/master/engine/src/flutter/docs/contributing/Compiling-the-engine.md).
 
 5. In **this repo**, update packages.
 
