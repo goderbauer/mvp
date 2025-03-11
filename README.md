@@ -29,22 +29,22 @@ The samples are meant to be used with a custom (prototype) engine using the mast
 
 0. Set up the Framework development environment: see [the wiki page](https://github.com/flutter/flutter/wiki/Setting-up-the-Framework-development-environment).
 
-1. In **the framework repo**, switch to the master branch:
+1. Set up the Engine development environment: see [the wiki page](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment).
+
+2. In **the Flutter repo**, switch to the main branch:
 ```
-git checkout master
+git checkout main
 ```
 
-2. Set up the Engine development environment: see [the wiki page](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment).
-
-3. Apply patches depending on platform:
-  * macOS only: in **the engine repo**, apply this playground's patch:
+3. In **the Flutter repo**, apply patches depending on platform:
+  * macOS only: apply this playground's patch:
 
      ```bash
      git apply /path/to/playground/patches/macos/001-Add-multi-view-Flutter-macOS-APIs.patch
      ```
 
-  * Windows only: in **the engine repo**, apply this playground's patch:
-  
+  * Windows only: apply this playground's patch:
+
      ```bash
      git apply /path/to/playground/patches/windows/001-Add-multi-view-Flutter-Windows-C++-APIs.patch
      ```
