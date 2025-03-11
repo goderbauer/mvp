@@ -20,13 +20,13 @@ Updates `FlutterViewController` and allows creating multiple windows on Windows:
  .../platform/windows/public/flutter_windows.h | 25 +++++++++++++++++
  9 files changed, 89 insertions(+), 45 deletions(-)
 
-diff --git a/shell/platform/windows/client_wrapper/flutter_engine.cc b/shell/platform/windows/client_wrapper/flutter_engine.cc
+diff --git a/engine/src/flutter/shell/platform/windows/client_wrapper/flutter_engine.cc b/engine/src/flutter/shell/platform/windows/client_wrapper/flutter_engine.cc
 index 7860947aa068b..3cbe59622fc4f 100644
---- a/shell/platform/windows/client_wrapper/flutter_engine.cc
-+++ b/shell/platform/windows/client_wrapper/flutter_engine.cc
+--- a/engine/src/flutter/shell/platform/windows/client_wrapper/flutter_engine.cc
++++ b/engine/src/flutter/shell/platform/windows/client_wrapper/flutter_engine.cc
 @@ -63,7 +63,7 @@ bool FlutterEngine::Run(const char* entry_point) {
  }
- 
+
  void FlutterEngine::ShutDown() {
 -  if (engine_ && owns_engine_) {
 +  if (engine_) {
@@ -36,17 +36,17 @@ index 7860947aa068b..3cbe59622fc4f 100644
 @@ -113,8 +113,7 @@ std::optional<LRESULT> FlutterEngine::ProcessExternalWindowMessage(
    return std::nullopt;
  }
- 
+
 -FlutterDesktopEngineRef FlutterEngine::RelinquishEngine() {
 -  owns_engine_ = false;
 +FlutterDesktopEngineRef FlutterEngine::engine() const {
    return engine_;
  }
- 
-diff --git a/shell/platform/windows/client_wrapper/flutter_view_controller.cc b/shell/platform/windows/client_wrapper/flutter_view_controller.cc
+
+diff --git a/engine/src/flutter/shell/platform/windows/client_wrapper/flutter_view_controller.cc b/engine/src/flutter/shell/platform/windows/client_wrapper/flutter_view_controller.cc
 index 98c65e10c27bc..1c1b51ee753c0 100644
---- a/shell/platform/windows/client_wrapper/flutter_view_controller.cc
-+++ b/shell/platform/windows/client_wrapper/flutter_view_controller.cc
+--- a/engine/src/flutter/shell/platform/windows/client_wrapper/flutter_view_controller.cc
++++ b/engine/src/flutter/shell/platform/windows/client_wrapper/flutter_view_controller.cc
 @@ -12,9 +12,32 @@ namespace flutter {
  FlutterViewController::FlutterViewController(int width,
                                               int height,
@@ -82,10 +82,10 @@ index 98c65e10c27bc..1c1b51ee753c0 100644
    if (!controller_) {
      std::cerr << "Failed to create view controller." << std::endl;
      return;
-diff --git a/shell/platform/windows/client_wrapper/flutter_view_controller_unittests.cc b/shell/platform/windows/client_wrapper/flutter_view_controller_unittests.cc
+diff --git a/engine/src/flutter/shell/platform/windows/client_wrapper/flutter_view_controller_unittests.cc b/engine/src/flutter/shell/platform/windows/client_wrapper/flutter_view_controller_unittests.cc
 index 837c2e13e583d..f79842f280978 100644
---- a/shell/platform/windows/client_wrapper/flutter_view_controller_unittests.cc
-+++ b/shell/platform/windows/client_wrapper/flutter_view_controller_unittests.cc
+--- a/engine/src/flutter/shell/platform/windows/client_wrapper/flutter_view_controller_unittests.cc
++++ b/engine/src/flutter/shell/platform/windows/client_wrapper/flutter_view_controller_unittests.cc
 @@ -17,10 +17,8 @@ namespace {
  class TestWindowsApi : public testing::StubFlutterWindowsApi {
   public:
@@ -98,7 +98,7 @@ index 837c2e13e583d..f79842f280978 100644
 +      const FlutterDesktopViewControllerProperties* properties) override {
      return reinterpret_cast<FlutterDesktopViewControllerRef>(2);
    }
- 
+
 @@ -63,11 +61,13 @@ TEST(FlutterViewControllerTest, CreateDestroy) {
    testing::ScopedStubFlutterWindowsApi scoped_api_stub(
        std::make_unique<TestWindowsApi>());
@@ -114,16 +114,16 @@ index 837c2e13e583d..f79842f280978 100644
 -  EXPECT_FALSE(test_api->engine_destroyed());
 +  EXPECT_TRUE(test_api->engine_destroyed());
  }
- 
+
  TEST(FlutterViewControllerTest, GetViewId) {
-diff --git a/shell/platform/windows/client_wrapper/include/flutter/flutter_engine.h b/shell/platform/windows/client_wrapper/include/flutter/flutter_engine.h
+diff --git a/engine/src/flutter/shell/platform/windows/client_wrapper/include/flutter/flutter_engine.h b/engine/src/flutter/shell/platform/windows/client_wrapper/include/flutter/flutter_engine.h
 index 0369db35a14fc..89ca2d188b46f 100644
---- a/shell/platform/windows/client_wrapper/include/flutter/flutter_engine.h
-+++ b/shell/platform/windows/client_wrapper/include/flutter/flutter_engine.h
+--- a/engine/src/flutter/shell/platform/windows/client_wrapper/include/flutter/flutter_engine.h
++++ b/engine/src/flutter/shell/platform/windows/client_wrapper/include/flutter/flutter_engine.h
 @@ -98,11 +98,8 @@ class FlutterEngine : public PluginRegistry {
    // For access to the engine handle.
    friend class FlutterViewController;
- 
+
 -  // Gives up ownership of |engine_|, but keeps a weak reference to it.
 -  //
 -  // This is intended to be used by FlutterViewController, since the underlying
@@ -131,27 +131,27 @@ index 0369db35a14fc..89ca2d188b46f 100644
 -  FlutterDesktopEngineRef RelinquishEngine();
 +  // Get the handle for interacting with the C API's engine reference.
 +  FlutterDesktopEngineRef engine() const;
- 
+
    // Handle for interacting with the C API's engine reference.
    FlutterDesktopEngineRef engine_ = nullptr;
 @@ -110,9 +107,6 @@ class FlutterEngine : public PluginRegistry {
    // Messenger for communicating with the engine.
    std::unique_ptr<BinaryMessenger> messenger_;
- 
+
 -  // Whether or not this wrapper owns |engine_|.
 -  bool owns_engine_ = true;
 -
    // Whether |Run| has been called successfully.
    //
    // This is used to improve error messages. This can be false while the engine
-diff --git a/shell/platform/windows/client_wrapper/include/flutter/flutter_view_controller.h b/shell/platform/windows/client_wrapper/include/flutter/flutter_view_controller.h
+diff --git a/engine/src/flutter/shell/platform/windows/client_wrapper/include/flutter/flutter_view_controller.h b/engine/src/flutter/shell/platform/windows/client_wrapper/include/flutter/flutter_view_controller.h
 index 4007534a5d73e..b26e017a6760a 100644
---- a/shell/platform/windows/client_wrapper/include/flutter/flutter_view_controller.h
-+++ b/shell/platform/windows/client_wrapper/include/flutter/flutter_view_controller.h
+--- a/engine/src/flutter/shell/platform/windows/client_wrapper/include/flutter/flutter_view_controller.h
++++ b/engine/src/flutter/shell/platform/windows/client_wrapper/include/flutter/flutter_view_controller.h
 @@ -32,6 +32,16 @@ class FlutterViewController {
    // |dart_project| will be used to configure the engine backing this view.
    FlutterViewController(int width, int height, const DartProject& project);
- 
+
 +  // Creates a FlutterView that can be parented into a Windows View hierarchy
 +  // either using HWNDs.
 +  //
@@ -163,26 +163,26 @@ index 4007534a5d73e..b26e017a6760a 100644
 +                        std::shared_ptr<FlutterEngine> engine);
 +
    virtual ~FlutterViewController();
- 
+
    // Prevent copying.
 @@ -44,6 +54,9 @@ class FlutterViewController {
    // Returns the engine running Flutter content in this view.
    FlutterEngine* engine() const { return engine_.get(); }
- 
+
 +  // Returns the engine running Flutter content in this view.
 +  std::shared_ptr<FlutterEngine> shared_engine() const { return engine_; }
 +
    // Returns the view managed by this controller.
    FlutterView* view() const { return view_.get(); }
- 
-diff --git a/shell/platform/windows/client_wrapper/testing/stub_flutter_windows_api.cc b/shell/platform/windows/client_wrapper/testing/stub_flutter_windows_api.cc
+
+diff --git a/engine/src/flutter/shell/platform/windows/client_wrapper/testing/stub_flutter_windows_api.cc b/engine/src/flutter/shell/platform/windows/client_wrapper/testing/stub_flutter_windows_api.cc
 index f51d7f14ad879..67582e1f0f0cc 100644
---- a/shell/platform/windows/client_wrapper/testing/stub_flutter_windows_api.cc
-+++ b/shell/platform/windows/client_wrapper/testing/stub_flutter_windows_api.cc
+--- a/engine/src/flutter/shell/platform/windows/client_wrapper/testing/stub_flutter_windows_api.cc
++++ b/engine/src/flutter/shell/platform/windows/client_wrapper/testing/stub_flutter_windows_api.cc
 @@ -114,6 +114,15 @@ bool FlutterDesktopEngineRun(FlutterDesktopEngineRef engine,
    return true;
  }
- 
+
 +FlutterDesktopViewControllerRef FlutterDesktopEngineCreateViewController(
 +    FlutterDesktopEngineRef engine,
 +    const FlutterDesktopViewControllerProperties* properties) {
@@ -195,14 +195,14 @@ index f51d7f14ad879..67582e1f0f0cc 100644
  uint64_t FlutterDesktopEngineProcessMessages(FlutterDesktopEngineRef engine) {
    if (s_stub_implementation) {
      return s_stub_implementation->EngineProcessMessages();
-diff --git a/shell/platform/windows/client_wrapper/testing/stub_flutter_windows_api.h b/shell/platform/windows/client_wrapper/testing/stub_flutter_windows_api.h
+diff --git a/engine/src/flutter/shell/platform/windows/client_wrapper/testing/stub_flutter_windows_api.h b/engine/src/flutter/shell/platform/windows/client_wrapper/testing/stub_flutter_windows_api.h
 index 8f3eb0905ac7a..754c3da8a9970 100644
---- a/shell/platform/windows/client_wrapper/testing/stub_flutter_windows_api.h
-+++ b/shell/platform/windows/client_wrapper/testing/stub_flutter_windows_api.h
+--- a/engine/src/flutter/shell/platform/windows/client_wrapper/testing/stub_flutter_windows_api.h
++++ b/engine/src/flutter/shell/platform/windows/client_wrapper/testing/stub_flutter_windows_api.h
 @@ -63,6 +63,12 @@ class StubFlutterWindowsApi {
    // Called for FlutterDesktopEngineRun.
    virtual bool EngineRun(const char* entry_point) { return true; }
- 
+
 +  // Called for FlutterDesktopEngineCreateViewController.
 +  virtual FlutterDesktopViewControllerRef EngineCreateViewController(
 +      const FlutterDesktopViewControllerProperties* properties) {
@@ -211,15 +211,15 @@ index 8f3eb0905ac7a..754c3da8a9970 100644
 +
    // Called for FlutterDesktopEngineProcessMessages.
    virtual uint64_t EngineProcessMessages() { return 0; }
- 
-diff --git a/shell/platform/windows/flutter_windows_internal.h b/shell/platform/windows/flutter_windows_internal.h
+
+diff --git a/engine/src/flutter/shell/platform/windows/flutter_windows_internal.h b/engine/src/flutter/shell/platform/windows/flutter_windows_internal.h
 index bb1e6f767905f..47b98e983a48a 100644
---- a/shell/platform/windows/flutter_windows_internal.h
-+++ b/shell/platform/windows/flutter_windows_internal.h
+--- a/engine/src/flutter/shell/platform/windows/flutter_windows_internal.h
++++ b/engine/src/flutter/shell/platform/windows/flutter_windows_internal.h
 @@ -14,31 +14,6 @@ extern "C" {
  // Declare functions that are currently in-progress and shall be exposed to the
  // public facing API upon completion.
- 
+
 -// Properties for configuring a Flutter view controller.
 -typedef struct {
 -  // The view's initial width.
@@ -246,16 +246,16 @@ index bb1e6f767905f..47b98e983a48a 100644
 -    const FlutterDesktopViewControllerProperties* properties);
 -
  typedef int64_t PlatformViewId;
- 
+
  typedef struct {
-diff --git a/shell/platform/windows/public/flutter_windows.h b/shell/platform/windows/public/flutter_windows.h
+diff --git a/engine/src/flutter/shell/platform/windows/public/flutter_windows.h b/engine/src/flutter/shell/platform/windows/public/flutter_windows.h
 index 80d78766f9383..d7b2a30520b04 100644
---- a/shell/platform/windows/public/flutter_windows.h
-+++ b/shell/platform/windows/public/flutter_windows.h
-@@ -70,6 +70,15 @@ typedef struct {
- 
+--- a/engine/src/flutter/shell/platform/windows/public/flutter_windows.h
++++ b/engine/src/flutter/shell/platform/windows/public/flutter_windows.h
+@@ -97,6 +97,15 @@ typedef struct {
+   FlutterDesktopUIThreadPolicy ui_thread_policy;
  } FlutterDesktopEngineProperties;
- 
+
 +// Properties for configuring a Flutter view controller.
 +typedef struct {
 +  // The view's initial width.
@@ -266,12 +266,12 @@ index 80d78766f9383..d7b2a30520b04 100644
 +} FlutterDesktopViewControllerProperties;
 +
  // ========== View Controller ==========
- 
+
  // Creates a view that hosts and displays the given engine instance.
 @@ -165,6 +174,22 @@ FLUTTER_EXPORT bool FlutterDesktopEngineDestroy(FlutterDesktopEngineRef engine);
  FLUTTER_EXPORT bool FlutterDesktopEngineRun(FlutterDesktopEngineRef engine,
                                              const char* entry_point);
- 
+
 +// Creates a view for the given engine.
 +//
 +// The |engine| will be started if it is not already running.

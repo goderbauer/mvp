@@ -27,29 +27,29 @@ The demos in this repository run on the following platforms:
 
 The samples are meant to be used with a custom (prototype) engine using the master branch of the framework.
 
-0. Set up the Framework development environment: see [the wiki page](https://github.com/flutter/flutter/wiki/Setting-up-the-Framework-development-environment).
+0. Set up the Framework development environment: see [the wiki page](https://github.com/flutter/flutter/blob/master/docs/contributing/Setting-up-the-Framework-development-environment.md).
 
-1. In **the framework repo**, switch to the master branch:
+1. Set up the Engine development environment: see [the wiki page](https://github.com/flutter/flutter/blob/master/engine/src/flutter/docs/contributing/Setting-up-the-Engine-development-environment.md).
+
+2. In **the Flutter repo**, switch to the main branch:
 ```
-git checkout master
+git checkout main
 ```
 
-2. Set up the Engine development environment: see [the wiki page](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment).
-
-3. Apply patches depending on platform:
-  * macOS only: in **the engine repo**, apply this playground's patch:
+3. In **the Flutter repo**, apply patches depending on platform:
+  * macOS only: apply this playground's patch:
 
      ```bash
      git apply /path/to/playground/patches/macos/001-Add-multi-view-Flutter-macOS-APIs.patch
      ```
 
-  * Windows only: in **the engine repo**, apply this playground's patch:
-  
+  * Windows only: apply this playground's patch:
+
      ```bash
      git apply /path/to/playground/patches/windows/001-Add-multi-view-Flutter-Windows-C++-APIs.patch
      ```
 
-4. Build the custom engine: see [the wiki page](https://github.com/flutter/flutter/wiki/Compiling-the-engine#compiling-for-macos-or-linux).
+4. Build the custom engine: see [the wiki page](https://github.com/flutter/flutter/blob/master/engine/src/flutter/docs/contributing/Compiling-the-engine.md).
 
 5. In **this repo**, update packages.
 

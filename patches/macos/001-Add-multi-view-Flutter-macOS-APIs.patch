@@ -15,10 +15,10 @@ Subject: [PATCH] Updates `FlutterViewController` and `FlutterEngine` and
  .../framework/Source/FlutterEngine_Internal.h |  29 ---
  5 files changed, 244 insertions(+), 66 deletions(-)
 
-diff --git a/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h b/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h
+diff --git a/engine/src/flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h b/engine/src/flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h
 index 306bfceb08..f8abb8bcac 100644
---- a/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h
-+++ b/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h
+--- a/engine/src/flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h
++++ b/engine/src/flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h
 @@ -91,6 +91,51 @@ FLUTTER_DARWIN_EXPORT
   */
  @property(nonatomic, nonnull, readonly) id<FlutterBinaryMessenger> binaryMessenger;
@@ -71,10 +71,10 @@ index 306bfceb08..f8abb8bcac 100644
  /**
   * Shuts the Flutter engine if it is running. The FlutterEngine instance must always be shutdown
   * before it may be collected. Not shutting down the FlutterEngine instance before releasing it will
-diff --git a/shell/platform/darwin/macos/framework/Headers/FlutterPluginRegistrarMacOS.h b/shell/platform/darwin/macos/framework/Headers/FlutterPluginRegistrarMacOS.h
+diff --git a/engine/src/flutter/shell/platform/darwin/macos/framework/Headers/FlutterPluginRegistrarMacOS.h b/engine/src/flutter/shell/platform/darwin/macos/framework/Headers/FlutterPluginRegistrarMacOS.h
 index 5b990dd84d..535379c3e2 100644
---- a/shell/platform/darwin/macos/framework/Headers/FlutterPluginRegistrarMacOS.h
-+++ b/shell/platform/darwin/macos/framework/Headers/FlutterPluginRegistrarMacOS.h
+--- a/engine/src/flutter/shell/platform/darwin/macos/framework/Headers/FlutterPluginRegistrarMacOS.h
++++ b/engine/src/flutter/shell/platform/darwin/macos/framework/Headers/FlutterPluginRegistrarMacOS.h
 @@ -17,6 +17,14 @@
  // TODO(stuartmorgan): Merge this file and FlutterPluginMacOS.h with the iOS FlutterPlugin.h,
  // sharing all but the platform-specific methods.
@@ -90,10 +90,10 @@ index 5b990dd84d..535379c3e2 100644
  /**
   * The protocol for an object managing registration for a plugin. It provides access to application
   * context, as allowing registering for callbacks for handling various conditions.
-diff --git a/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h b/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h
+diff --git a/engine/src/flutter/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h b/engine/src/flutter/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h
 index f20aea4125..71184df028 100644
---- a/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h
-+++ b/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h
+--- a/engine/src/flutter/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h
++++ b/engine/src/flutter/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h
 @@ -12,14 +12,6 @@
  #import "FlutterPlatformViews.h"
  #import "FlutterPluginRegistrarMacOS.h"
@@ -153,10 +153,10 @@ index f20aea4125..71184df028 100644
   *
   * @param engine The `FlutterEngine` instance to attach to. Cannot be nil.
   * @param nibName The NIB name to initialize this controller with.
-diff --git a/shell/platform/darwin/macos/framework/Source/FlutterEngine.mm b/shell/platform/darwin/macos/framework/Source/FlutterEngine.mm
+diff --git a/engine/src/flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine.mm b/engine/src/flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine.mm
 index 2c79ee079d..58c9776ad3 100644
---- a/shell/platform/darwin/macos/framework/Source/FlutterEngine.mm
-+++ b/shell/platform/darwin/macos/framework/Source/FlutterEngine.mm
+--- a/engine/src/flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine.mm
++++ b/engine/src/flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine.mm
 @@ -181,6 +181,24 @@ constexpr char kTextPlainFormat[] = "text/plain";
   */
  - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
@@ -192,23 +192,16 @@ index 2c79ee079d..58c9776ad3 100644
    // Whether the application is currently the active application.
    BOOL _active;
 
-@@ -513,6 +534,8 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
+@@ -513,7 +534,9 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
    _binaryMessenger = [[FlutterBinaryMessengerRelay alloc] initWithParent:self];
    _isResponseValid = [[NSMutableArray alloc] initWithCapacity:1];
    [_isResponseValid addObject:@YES];
+   _keyboardManager = [[FlutterKeyboardManager alloc] initWithDelegate:self];
 +  // kFlutterImplicitViewId is reserved for the implicit view.
 +  _nextRegularViewIdentifier = kFlutterImplicitViewId + 1;
 
    _embedderAPI.struct_size = sizeof(FlutterEngineProcTable);
    FlutterEngineGetProcAddresses(&_embedderAPI);
-@@ -527,6 +550,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
-                            object:nil];
-
-   _platformViewController = [[FlutterPlatformViewController alloc] init];
-+
-   _threadSynchronizer = [[FlutterThreadSynchronizer alloc] init];
-   // The macOS compositor must be initialized in the initializer because it is
-   // used when adding views, which might happen before runWithEntrypoint.
 @@ -699,6 +723,11 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
    NSEnumerator* viewControllerEnumerator = [_viewControllers objectEnumerator];
    FlutterViewController* nextViewController;
@@ -413,10 +406,10 @@ index 2c79ee079d..58c9776ad3 100644
  - (void)sendUserLocales {
    if (!self.running) {
      return;
-diff --git a/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h b/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h
+diff --git a/engine/src/flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h b/engine/src/flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h
 index d1c328a226..9b53a59e39 100644
---- a/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h
-+++ b/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h
+--- a/engine/src/flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h
++++ b/engine/src/flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h
 @@ -121,40 +121,11 @@ typedef NS_ENUM(NSInteger, FlutterAppExitResponse) {
   */
  @property(nonatomic, readonly) FlutterEngineTerminationHandler* terminationHandler;
